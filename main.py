@@ -1,76 +1,74 @@
-
 import pygame
 import sys
-
 from settings import Settings
-# from ship import Ship
 
 
 class AlienInvasion:
     def __init__(self,settings):
-        """Przypisanie ustawień z klasy Settings do zmiennej"""
-        self.settings = settings
+        self.settings = settings   # Przypisanie ustawień z klasy Settings do zmiennej
 
-        """Utworzenie zmiennej, oraz utworzenie okienka gry"""
-        self.screen = pygame.display.set_mode((self.settings.screen_width,self.settings.screen_height))
+        self.screen = pygame.display.set_mode((self.settings.screen_width,self.settings.screen_height)) # Utworzenie zmiennej, oraz utworzenie okienka gry
 
 
     def run_game(self):
-        """Inicjalizacja gry"""
-        pygame.init()
+        pygame.init()   # Inicjalizacja gry
 
-        """Nagłówek"""
-        pygame.display.set_caption("Inwazja obcych")
+        pygame.display.set_caption("Inwazja obcych")   # Nagłówek
 
-        x = 265
-        y = 680
+        ship = Ship(Settings())
 
-        # spaceship_postion = pygame.rect.Rect(x, y, 60, 60)
         while True:
+            pygame.time.Clock().tick(60) # Maksymalne FPS
+
             for event in pygame.event.get():
-                """Wyłączanie gry, jeśli klikniemy X"""
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT:  # Wyłączanie gry, jeśli klikniemy X
                     sys.exit()
 
+            self.screen.fill((230, 0, 0))  # Rysowanie tła
 
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                x -= 1
-            if keys[pygame.K_RIGHT]:
-                x += 1
-            spaceship_postion = pygame.rect.Rect(x, y, 60, 60)
+            spaceship_position = ship.movement() # Przypisanie pozycji i rozmiaru prostokąta do zmiennej
 
-            # Ship().movement()
+            pygame.draw.rect(self.screen,(0,230,0),spaceship_position)    # Rysowanie prostokąta (wybrany ekran,
+                                                                # kolor prostokąta, wybrany prostokąt i jego położenie)
 
-            """Rysowanie tła"""
-            self.screen.fill((230,0,0))
-
-            """Rysowanie prostokąta (wybrany ekran, kolor prostokąta, wybrany prostokąt i jego położenie)"""
-            pygame.draw.rect(self.screen,(0,230,0),spaceship_postion)
+            pygame.display.update()  # Wyswietlenie ostatnio zmodyfikowanego ekranu
 
 
-            """Wyswietlenie ostatnio zmodyfikowanego ekranu"""
-            pygame.display.update()
-#
-# class Ship(AlienInvasion):
-#     def __init__(self):
-#         """Położenie prostokąta (dwie piersze liczby), rozmiar prostokąta (dwie ostatnie)"""
-#         x = 265
-#         y = 680
-#         self.spaceship_postion = pygame.rect.Rect(x, y, 60, 60)
-#
-#
-#     def movement(self):
-#         x = 265
-#         y = 680
-#         keys = pygame.key.get_pressed()
-#         if keys[pygame.K_LEFT]:
-#             x -= 5
-#         if keys[pygame.K_RIGHT]:
-#             x += 5
-#
-#         self.spaceship_postion = pygame.rect.Rect(x, y, 60, 60)
-#         pygame.draw.rect(self.screen,(0, 230, 0), self.spaceship_postion)
+class Ship(AlienInvasion):
+    def __init__(self,settings):
+        super().__init__(settings)
+        self.speed = 10
+        self.rect_x_position = 265
+        self.rect_y_position = 680
+        self.rect_width = 60
+        self.rect_heigth = 60
+
+
+    def movement(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect_x_position -= self.speed
+            if self.rect_x_position < -self.rect_width:  # jeśli pozycja jest mniejsza kwadrat przenosi się na:
+                self.rect_x_position = 589  # prawą krawędź okna
+
+        if keys[pygame.K_RIGHT]:
+            self.rect_x_position += self.speed
+            if self.rect_x_position > 589:    # jeśli pozycja x kwadratu przekracza szerokość okna (589) to zmień ją na:
+                self.rect_x_position = 0    # lewą krawędź okna (x = 0)
+
+        if keys[pygame.K_UP]:
+            self.rect_y_position -= self.speed
+            if self.rect_y_position < - self.rect_heigth:
+                self.rect_y_position = 793
+
+        if keys[pygame.K_DOWN]:
+            self.rect_y_position += self.speed
+            if self.rect_y_position > 793:
+                self.rect_y_position = 0
+
+        return pygame.rect.Rect(self.rect_x_position, self.rect_y_position, self.rect_width, self.rect_heigth)   # tworzenie prostokąta (2 pierwsze zmienne to jego położenie),
+                                                                                    # (2 pozostałe to rozmiar)
+
 
 
 game = AlienInvasion(Settings())
