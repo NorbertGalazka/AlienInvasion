@@ -9,7 +9,7 @@ class AlienInvasion:
 
         self.settings = settings
 
-        self.screen = pygame.display.set_mode((self.settings.screen_width,self.settings.screen_height)) # Utworzenie zmiennej, oraz utworzenie okienka gry
+        self.screen = pygame.display.set_mode((self.settings.screen_width,self.settings.screen_height)) # Utworzenie okienka gry
 
 
     def run_game(self):
@@ -36,41 +36,45 @@ class AlienInvasion:
 
 
 class Ship():
-    def __init__(self):
+    def __init__(self,settings):
+        self.settings = settings
         self.speed = 10
-        self.rect_x_position = 265
-        self.rect_y_position = 680
+        self.rect_start_x_position = 265
+        self.rect_start_y_position = 680
         self.rect_width = 75
         self.rect_height = 68
+        self.first_pixel = 0
 
 
     def movement(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.rect_x_position -= self.speed
-            if self.rect_x_position < -self.rect_width:  # jeśli pozycja jest mniejsza kwadrat przenosi się na:
-                self.rect_x_position = 589  # prawą krawędź okna
+            self.rect_start_x_position -= self.speed
+            if self.rect_start_x_position < -self.rect_width:  # jeśli pozycja jest mniejsza kwadrat przenosi się na:
+                self.rect_start_x_position = self.settings.screen_width  # prawą krawędź okna
 
         if keys[pygame.K_RIGHT]:
-            self.rect_x_position += self.speed
-            if self.rect_x_position > 589:    # jeśli pozycja x kwadratu przekracza szerokość okna (589) to zmień ją na:
-                self.rect_x_position = 0    # lewą krawędź okna (x = 0)
+            self.rect_start_x_position += self.speed
+            if self.rect_start_x_position > self.settings.screen_width:    # jeśli pozycja x kwadratu przekracza szerokość okna (589) to zmień ją na:
+                self.rect_start_x_position = self.first_pixel    # lewą krawędź okna (x = 0)
 
         if keys[pygame.K_UP]:
-            self.rect_y_position -= self.speed
-            if self.rect_y_position < - self.rect_height:
-                self.rect_y_position = 793
+            self.rect_start_y_position -= self.speed
+            if self.rect_start_y_position < - self.rect_height:
+                self.rect_start_y_position = self.settings.screen_height
 
         if keys[pygame.K_DOWN]:
-            self.rect_y_position += self.speed
-            if self.rect_y_position > 793:
-                self.rect_y_position = 0
+            self.rect_start_y_position += self.speed
+            if self.rect_start_y_position > self.settings.screen_height:
+                self.rect_start_y_position = self.first_pixel
 
-        return pygame.rect.Rect(self.rect_x_position, self.rect_y_position, self.rect_width, self.rect_height)   # tworzenie prostokąta (2 pierwsze zmienne to jego położenie),
+        return pygame.rect.Rect(self.rect_start_x_position, self.rect_start_y_position, self.rect_width, self.rect_height)   # tworzenie prostokąta (2 pierwsze zmienne to jego położenie),
                                                                                     # (2 pozostałe to rozmiar)
 
 
-game = AlienInvasion(settings=Settings(), ship=Ship())
+game = AlienInvasion(settings=Settings(), ship=Ship(Settings()))
+
+ship = Ship(Settings())
 
 game.run_game()
 
