@@ -15,7 +15,7 @@ class GameSettings:
 class BulletSettings:
     def __init__(self):
         self.bullet_speed = 9
-        self.bullet_width = 4
+        self.bullet_width = 5
         self.bullet_height = 15
         self.bullet_color = (255, 128, 0)
         self.bullet_start_x = 300
