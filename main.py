@@ -1,26 +1,26 @@
 import pygame
 import sys
-from settings import Settings
+from gamesettings import GameSettings
+from gamesettings import BulletSettings
 import random
 
 
 class AlienInvasion:
-    def __init__(self, settings, ship, bullet,aliens):
+    def __init__(self, game_settings, ship, bullet, aliens, bullet_settings):
         self.aliens = aliens
         self.ship = ship
-        self.settings = settings
+        self.game_settings = game_settings
+        self.bullet_settings = bullet_settings
         self.bullet = bullet
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))  # Utworzenie okienka gry
+            (self.game_settings.screen_width, self.game_settings.screen_height))  # Utworzenie okienka gry
         self.spaceship_position = \
-            pygame.rect.Rect(265, 680, self.settings.spaceship_img.get_width(), self.settings.spaceship_img.get_height())
+            pygame.rect.Rect(265, 680, self.game_settings.spaceship_img.get_width(), self.game_settings.spaceship_img.get_height())
 
     def run_game(self):
         pygame.init()  # Inicjalizacja gry
         pygame.display.set_caption("Inwazja obcych")
         bullets = []
-        x = 50
-        y = 50
         aliens = self.aliens.create_aliens()
         while True:
             pygame.time.Clock().tick(60)  # Maksymalne FPS
@@ -33,10 +33,10 @@ class AlienInvasion:
                 if event.type == pygame.KEYDOWN and len(bullets) < 5:
                     if event.key == pygame.K_SPACE:
                         bullets.append(Bullet(self.ship.rect_start_x_position + 36, self.ship.rect_start_y_position,
-                                              self.settings))
+                                              self.game_settings,self.bullet_settings))
 
-            self.screen.blit(self.settings.bg, (0, 0))  # rysowanie tła
-            self.screen.blit(self.settings.spaceship_img, spaceship_rect)  # wstawianie obrazka (obrazek,pozycja)
+            self.screen.blit(self.game_settings.bg, (0, 0))  # rysowanie tła
+            self.screen.blit(self.game_settings.spaceship_img, spaceship_rect)  # wstawianie obrazka (obrazek,pozycja)
 
             self.bullet.get_bullet_rect(bullets)  # robienie i rysowanie pocisku
             self.bullet.change_bullet_position(bullets)
@@ -45,8 +45,6 @@ class AlienInvasion:
             self.aliens.alien_movement()
 
             pygame.display.update()  # Wyswietlenie ostatnio zmodyfikowanego ekranu
-
-# class
 
 
 class Aliens():
@@ -127,19 +125,20 @@ class Ship:
 
 
 class Bullet:
-    def __init__(self, bullet_x_start_position, bullet_y_start_position, settings):
+    def __init__(self, bullet_x_start_position, bullet_y_start_position, game_settings, bullet_settings):
         self.bullet_x_start_position = bullet_x_start_position
         self.bullet_y_start_position = bullet_y_start_position
-        self.settings = settings
+        self.settings = game_settings
+        self.bullet_settings = bullet_settings
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
 
     def get_bullet_rect(self, bullets):
         for bullet in bullets:
             bullet_position = pygame.rect.Rect(bullet.bullet_x_start_position, bullet.bullet_y_start_position,
-                                               self.settings.bullet_width,
-                                               self.settings.bullet_height)
-            pygame.draw.rect(self.screen, self.settings.bullet_color, bullet_position)
+                                               self.bullet_settings.bullet_width,
+                                               self.bullet_settings.bullet_height)
+            pygame.draw.rect(self.screen, self.bullet_settings.bullet_color, bullet_position)
 
     def change_bullet_position(self,bullets):
         for bullet in bullets:
@@ -149,7 +148,8 @@ class Bullet:
 
 
 def main():
-    game = AlienInvasion(settings=Settings(), ship=Ship(Settings()),bullet=Bullet(0, 0, Settings()),aliens=Aliens(0,0,Settings()))
+    game = AlienInvasion(game_settings=GameSettings(), ship=Ship(GameSettings()), bullet=Bullet(0, 0, GameSettings(),
+                        BulletSettings()), aliens=Aliens(0, 0, GameSettings()), bullet_settings=BulletSettings())
     game.run_game()
 
 
