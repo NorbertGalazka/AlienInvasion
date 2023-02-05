@@ -46,6 +46,8 @@ class AlienInvasion:
 
             pygame.display.update()  # Wyswietlenie ostatnio zmodyfikowanego ekranu
 
+# class
+
 
 class Aliens():
     def __init__(self, alien_x_position, alien_y_position, settings):
@@ -54,13 +56,12 @@ class Aliens():
         self.image_height = self.image.get_height()
         self.alien_x_position = alien_x_position
         self.alien_y_position = alien_y_position
-        self.row = 2
         self.settings = settings
+        self.row = 2
         self.cols = 3
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
         self.aliens = []
-        self.move_counter = 0
         self.move_direction = 1
 
     def create_aliens(self):
@@ -79,12 +80,11 @@ class Aliens():
 
     def alien_movement(self):
         for alien in self.aliens:
-            alien.alien_x_position += self.move_direction  # zwiększamy pozycje x o 1 lub - 1
-            self.move_counter += 1
-            print(self.move_counter)
-            if self.move_counter >= 550 or self.move_counter <= -550:   # jeśli licznik osiągnie 550 lub -550:
-                self.move_direction *= -1  # zmiana kierunku odliczania
-                self.move_counter *= self.move_direction  # zmienia zawsze move_counter na -550
+            alien.alien_x_position += self.move_direction
+            if alien.alien_x_position < 0:
+                self.move_direction *= -1
+            elif alien.alien_x_position > 500:
+                self.move_direction *= -1
 
 
 class Ship:
