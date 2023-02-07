@@ -14,14 +14,19 @@ class AlienInvasion:
         self.bullet = bullet
         self.screen = pygame.display.set_mode(
             (self.game_settings.screen_width, self.game_settings.screen_height))  # Utworzenie okienka gry
-        self.spaceship_position = \
-            pygame.rect.Rect(265, 680, self.game_settings.spaceship_img.get_width(), self.game_settings.spaceship_img.get_height())
+        self.alien_columns = 3
+        self.alien_rows = 2
 
     def run_game(self):
-        pygame.init()  # Inicjalizacja gry
+        pygame.init()
         pygame.display.set_caption("Inwazja obcych")
         bullets = []
-        aliens = self.alien.create_aliens()
+        aliens = []
+
+        for row in range(self.alien_rows):  # Utworzenie obcych
+            for amount in range(self.alien_columns):
+                alien = Alien(100 + amount * 150, 50 + row * 150, self.game_settings)  # Alien(x_pos,y_pos,sett)
+                aliens.append(alien)
 
         while True:
             pygame.time.Clock().tick(60)  # Maksymalne FPS
@@ -42,17 +47,21 @@ class AlienInvasion:
             self.bullet.change_bullet_position(bullets)
 
             self.alien.get_alien_rect(aliens)
-            self.alien.alien_movement()
+            self.alien.alien_movement(aliens)
 
             for alien in aliens:
-                if self.bullet.bullet_position.colliderect(self.alien.aliens_position):
-                    aliens.remove(alien)
-            print(len(aliens))
-            print(self.alien.aliens_position)
-            print(self.bullet.bullet_position)
+                for bullet in bullets:
+                    alien_position = pygame.rect.Rect(alien.alien_x_position, alien.alien_y_position,
+                                                      self.alien.image_width,
+                                                      self.alien.image_height)
+                    bullet_position = pygame.rect.Rect(bullet.bullet_x_start_position, bullet.bullet_y_start_position,
+                                                       self.bullet_settings.bullet_width,
+                                                       self.bullet_settings.bullet_height)
+                    if bullet_position.colliderect(alien_position):
+                        aliens.remove(alien)
+                        bullets.remove(bullet)
 
-
-            pygame.display.update()  # Wyswietlenie ostatnio zmodyfikowanego ekranu
+            pygame.display.update()  # Wyświetlenie ostatnio zmodyfikowanego ekranu
 
 
 class Alien():
@@ -63,29 +72,17 @@ class Alien():
         self.alien_x_position = alien_x_position
         self.alien_y_position = alien_y_position
         self.settings = settings
-        self.row = 2
-        self.cols = 3
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
-        self.aliens = []
         self.move_direction = 1
-        self.aliens_position = pygame.rect.Rect(self.alien_x_position, self.alien_y_position,
-                                                self.image_width, self.image_height)
 
-    def create_aliens(self):
-        for row in range(self.row):
-            for item in range(self.cols):
-                alien = Alien(100 + item * 150, 50 + row * 150, self.settings)
-                self.aliens.append(alien)
-        return self.aliens
-
-    def get_alien_rect(self,aliens):
+    def get_alien_rect(self, aliens):
         for alien in aliens:
-            self.aliens_position = pygame.rect.Rect(alien.alien_x_position, alien.alien_y_position,
-                                                   self.image_width, self.image_height)
-            self.screen.blit(self.image, self.aliens_position)
+            aliens_position = pygame.rect.Rect(alien.alien_x_position, alien.alien_y_position,
+                                               alien.image_width, alien.image_height)
+            self.screen.blit(alien.image, aliens_position)
 
-    def alien_movement(self):
-        for alien in self.aliens:
+    def alien_movement(self, aliens):
+        for alien in aliens:
             alien.alien_y_position += 0.1
             alien.alien_x_position += self.move_direction
             if alien.alien_x_position < 0:
@@ -139,8 +136,7 @@ class Bullet:
         self.bullet_y_start_position = bullet_y_start_position
         self.settings = game_settings
         self.bullet_settings = bullet_settings
-        self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+        self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.bullet_position = pygame.Rect(self.bullet_x_start_position, self.bullet_y_start_position,
                                            self.bullet_settings.bullet_width, self.bullet_settings.bullet_height)
 
@@ -150,7 +146,6 @@ class Bullet:
                                                     self.bullet_settings.bullet_width,
                                                     self.bullet_settings.bullet_height)
             pygame.draw.rect(self.screen, self.bullet_settings.bullet_color, self.bullet_position)
-            # print(len(bullets))
 
     def change_bullet_position(self,bullets):
         for bullet in bullets:
