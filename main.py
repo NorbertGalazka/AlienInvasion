@@ -82,7 +82,7 @@ class AlienInvasion:
         # pygame.init()
         bullets = []
         boss_bullets = []
-        boss = BossAlien(0,0)
+        boss = BossAlien(0, 0)
 
         while True:
             pygame.time.Clock().tick(60)  # Maksymalne FPS
@@ -99,9 +99,11 @@ class AlienInvasion:
 
             GameSettings.screen.blit(GameSettings.bg, (0, 0))
 
-            boss.get_boss_rect()
-
             spaceship_position = self.ship.get_ship_rect()
+            spaceship_x_position = spaceship_position[0]
+            spaceship_y_position = spaceship_position[1]
+
+            boss.get_boss_rect(spaceship_x_position,spaceship_y_position)
 
             self.bullet.get_bullet_rect(bullets)  # robienie i rysowanie pocisku
             self.bullet.change_bullet_position(bullets)
@@ -151,11 +153,9 @@ class AlienInvasion:
             self.remove_alien_spaceship_bullet_if_collision(aliens, bullets)
 
             is_game_started = self.alien_bullet_collision_spaceship(alien_bullets, spaceship_position)
-            print(len(aliens))
 
             if is_game_started is None:
                 pygame.display.update()  # Wyświetlenie ostatnio zmodyfikowanego ekranu
-                print(len(aliens))
             else:
                 self.restart_game_menu()
             if len(aliens) == 0:
@@ -201,6 +201,7 @@ class MainMenuButton:
             if pygame.mouse.get_pressed()[0]:
                 return True
 
+
 class BossAlienBullet:
     def __init__(self, bullet_x_start_position, bullet_y_start_position):
         self.bullet_x_start_position = bullet_x_start_position
@@ -222,40 +223,23 @@ class BossAlienBullet:
                 boss_bullets.pop(boss_bullets.index(bullet))
 
 
-
 class BossAlien:
     def __init__(self,boss_start_x_position, boss_start_y_position):
         self.boss_start_x_position = boss_start_x_position
         self.boss_start_y_position = boss_start_y_position
-    def get_boss_position(self):
-        # keys = pygame.key.get_pressed()
-        direction = random.randint(2, 3)
-        if direction == 1:
-            self.boss_start_x_position -= ShipSettings.speed
-            if self.boss_start_x_position < - ShipSettings.rect_width:
-                self.boss_start_x_position = GameSettings.screen_width
 
-        if direction == 2:
-            self.boss_start_x_position += ShipSettings.speed
-            if self.boss_start_x_position > GameSettings.screen_width:
-                self.boss_start_x_position = GameSettings.left_edge_of_the_screen
+    def get_boss_rect(self, spaceship_x_position, spaceship_y_position):
+        if spaceship_x_position > self.boss_start_x_position:
+            self.boss_start_x_position += 0.5
+        if spaceship_x_position < self.boss_start_x_position:
+            self.boss_start_x_position -= 0.5
+        if spaceship_y_position > self.boss_start_y_position:
+            self.boss_start_y_position += 0.5
+        if spaceship_y_position < self.boss_start_y_position:
+            self.boss_start_y_position -= 0.5
 
-        if direction == 3:
-            self.boss_start_y_position -= ShipSettings.speed
-            if self.boss_start_y_position < - ShipSettings.rect_height:
-                self.boss_start_y_position = GameSettings.screen_height
-
-        if direction == 4:
-            self.boss_start_y_position += ShipSettings.speed
-            if self.boss_start_y_position > GameSettings.screen_height:
-                self.boss_start_y_position = GameSettings.left_edge_of_the_screen
-
-        return self.boss_start_x_position, self.boss_start_y_position
-
-    def get_boss_rect(self):
-        boss_x_position, boss_y_position = self.get_boss_position()
-        boss_position = pygame.rect.Rect(boss_x_position, boss_y_position, ShipSettings.rect_width,
-                                              ShipSettings.rect_height)
+        boss_position = pygame.rect.Rect(self.boss_start_x_position, self.boss_start_y_position, ShipSettings.rect_width,
+                                         ShipSettings.rect_height)
         GameSettings.screen.blit(ShipSettings.spaceship_img, boss_position)
         return boss_position
 
@@ -321,6 +305,7 @@ class Ship:
         GameSettings.screen.blit(ShipSettings.spaceship_img, spaceship_position)
         return spaceship_position
 
+
 class SpaceshipBullet:
     def __init__(self, bullet_x_start_position, bullet_y_start_position):
         self.bullet_x_start_position = bullet_x_start_position
@@ -366,7 +351,6 @@ class AlienBullet:
 def main():
     game = AlienInvasion(alien=Alien(0, 0))
 
-    # game.run_game()
     game.main_menu()
 
 if __name__ == "__main__":
