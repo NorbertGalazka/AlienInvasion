@@ -7,16 +7,18 @@ from settings import ShipBulletSettings
 from settings import AlienBulletSettings
 from settings import AlienSettings
 from settings import ShipSettings
+from settings import BossSettings
 
 
 class AlienInvasion:
     def __init__(self, alien):
         self.alien = alien
         self.ship = Ship()
-        self.boss = BossAlien(0 , 0)
+        self.boss = BossAlien(0, 0)
         self.bullet = SpaceshipBullet(0, 0)
         self.alien_bullet = AlienBullet(0, 0)
-        self.boss_bullet = BossAlienBullet(0, 0)
+        # self.move_directions = [-7, 7]
+        self.boss_bullet = BossAlienBullet(0, 0, 0, 0)
         self.lost_game_button = LostGameButton()
         self.main_menu_button = MainMenuButton()
         self.last_alien_shot = pygame.time.get_ticks()
@@ -37,7 +39,10 @@ class AlienInvasion:
     def boss_shot(self,time_now, boss_bullets,boss):
         if time_now - self.last_alien_shot > AlienSettings.alien_cooldown:
             attacking_alien = boss
-            boss_bullet = BossAlienBullet(attacking_alien.boss_start_x_position + 34, attacking_alien.boss_start_y_position + 60)
+            shot_directions = [7, -7]
+            boss_bullet = BossAlienBullet(attacking_alien.boss_start_x_position + 34,
+                                          attacking_alien.boss_start_y_position + 60,
+                                          7, 7)
             boss_bullets.append(boss_bullet)
             self.last_alien_shot = time_now
 
@@ -65,6 +70,32 @@ class AlienInvasion:
                 alien_bullets.remove(alien_bullet)
                 return False
 
+    def spacebullet_collision_boss_alien(self, bullets, boss_position):
+        for bullet in bullets:
+            bullet_position = pygame.rect.Rect(bullet.bullet_x_start_position,
+                                               bullet.bullet_y_start_position,
+                                               ShipBulletSettings.bullet_width, ShipBulletSettings.bullet_height)
+            if boss_position.colliderect(bullet_position):
+                bullets.remove(bullet)
+                self.boss.boss_hp -= 1
+            if self.boss.boss_hp <= 0:
+                self.boss.boss_hp = 3
+                return True
+
+    def you_win_menu(self):
+        self.lost_game_button.restart_button_x_cord = 100
+        self.lost_game_button.restart_button_y_cord = 600
+        while True:
+            pygame.time.Clock().tick(60)  # Maksymalne FPS
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:  # Wyłączanie gry, jeśli klikniemy X
+                    sys.exit()
+            GameSettings.screen.blit(GameSettings.bg, (0, 0))
+            GameSettings.screen.blit(GameSettings.you_win_image, (46, 220))
+            if self.lost_game_button.restart_button_is_pressed():
+                self.run_game()
+            pygame.display.update()
+
     def restart_game_menu(self):
         while True:
             pygame.time.Clock().tick(60)  # Maksymalne FPS
@@ -79,10 +110,9 @@ class AlienInvasion:
             pygame.display.update()
 
     def second_round(self):
-        # pygame.init()
         bullets = []
         boss_bullets = []
-        boss = BossAlien(0, 0)
+        boss = BossAlien(250, 50)
 
         while True:
             pygame.time.Clock().tick(60)  # Maksymalne FPS
@@ -103,16 +133,27 @@ class AlienInvasion:
             spaceship_x_position = spaceship_position[0]
             spaceship_y_position = spaceship_position[1]
 
-            boss.get_boss_rect(spaceship_x_position,spaceship_y_position)
+            boss_position = boss.get_boss_rect(spaceship_x_position, spaceship_y_position)
 
             self.bullet.get_bullet_rect(bullets)  # robienie i rysowanie pocisku
             self.bullet.change_bullet_position(bullets)
 
-            self.alien_bullet.get_alien_bullet_rect(boss_bullets)
-            self.boss_shot(time_now, boss_bullets,boss)
-            self.alien_bullet.change_alien_bullet_position(boss_bullets)
+            self.boss_shot(time_now, boss_bullets, boss)
+            self.boss_bullet.get_boss_alien_bullet_rect(boss_bullets)
+            self.boss_bullet.change_boss_alien_bullet_position(boss_bullets)
 
-            pygame.display.update()
+            if boss_position.colliderect(spaceship_position):
+                self.restart_game_menu()
+
+            if self.spacebullet_collision_boss_alien(bullets, boss_position):
+                self.you_win_menu()
+
+            is_game_started = self.alien_bullet_collision_spaceship(boss_bullets, spaceship_position)
+
+            if is_game_started is None:
+                pygame.display.update()  # Wyświetlenie ostatnio zmodyfikowanego ekranu
+            else:
+                self.restart_game_menu()
 
     def run_game(self):
         pygame.init()
@@ -181,7 +222,7 @@ class LostGameButton:
         self.restart_image_hitbox = pygame.Rect(self.restart_button_x_cord, self.restart_button_y_cord,
                                                 self.restart_image.get_width(), self.restart_image.get_height())
 
-    def restart_button_is_pressed(self):
+    def restart_button_is_pressed(self,):
         GameSettings.screen.blit(self.restart_image, (self.restart_button_x_cord, self.restart_button_y_cord))
         if self.restart_image_hitbox.collidepoint(pygame.mouse.get_pos()):
             if pygame.mouse.get_pressed()[0]:
@@ -203,12 +244,14 @@ class MainMenuButton:
 
 
 class BossAlienBullet:
-    def __init__(self, bullet_x_start_position, bullet_y_start_position):
+    def __init__(self, bullet_x_start_position, bullet_y_start_position, bullet_direction_x, bullet_direction_y):
         self.bullet_x_start_position = bullet_x_start_position
         self.bullet_y_start_position = bullet_y_start_position
         self.bullet_position = pygame.Rect(self.bullet_x_start_position, self.bullet_y_start_position,
-                                            AlienBulletSettings.bullet_width,
-                                            AlienBulletSettings.bullet_height)
+                                           AlienBulletSettings.bullet_width,
+                                           AlienBulletSettings.bullet_height)
+        self.bullet_direction_x = bullet_direction_x
+        self.bullet_direction_y = bullet_direction_y
 
     def get_boss_alien_bullet_rect(self, boss_bullets):
         for bullet in boss_bullets:
@@ -218,7 +261,8 @@ class BossAlienBullet:
 
     def change_boss_alien_bullet_position(self, boss_bullets):
         for bullet in boss_bullets:
-            bullet.bullet_y_start_position += 7
+            bullet.bullet_y_start_position += self.bullet_direction_x
+            bullet.bullet_x_start_position += self.bullet_direction_y
             if bullet.bullet_y_start_position >= 1000:
                 boss_bullets.pop(boss_bullets.index(bullet))
 
@@ -227,20 +271,21 @@ class BossAlien:
     def __init__(self,boss_start_x_position, boss_start_y_position):
         self.boss_start_x_position = boss_start_x_position
         self.boss_start_y_position = boss_start_y_position
+        self.boss_hp = 3
 
     def get_boss_rect(self, spaceship_x_position, spaceship_y_position):
         if spaceship_x_position > self.boss_start_x_position:
-            self.boss_start_x_position += 0.5
+            self.boss_start_x_position += BossSettings.boss_speed
         if spaceship_x_position < self.boss_start_x_position:
-            self.boss_start_x_position -= 0.5
+            self.boss_start_x_position -= BossSettings.boss_speed
         if spaceship_y_position > self.boss_start_y_position:
-            self.boss_start_y_position += 0.5
+            self.boss_start_y_position += BossSettings.boss_speed
         if spaceship_y_position < self.boss_start_y_position:
-            self.boss_start_y_position -= 0.5
+            self.boss_start_y_position -= BossSettings.boss_speed
 
         boss_position = pygame.rect.Rect(self.boss_start_x_position, self.boss_start_y_position, ShipSettings.rect_width,
                                          ShipSettings.rect_height)
-        GameSettings.screen.blit(ShipSettings.spaceship_img, boss_position)
+        GameSettings.screen.blit(BossSettings.boss_img, boss_position)
         return boss_position
 
 
