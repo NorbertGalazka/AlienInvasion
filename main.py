@@ -8,6 +8,7 @@ from Ship import Ship, SpaceshipBullet
 from Alien import Alien, AlienBullet
 from Boss import BossAlien, BossAlienBullet
 from Buttons import LostGameButton, MainMenuButton
+from Explosion import Explosion
 
 
 class AlienInvasion:
@@ -173,7 +174,6 @@ class AlienInvasion:
                 self.restart_game_menu()
 
     def run_game(self):
-        print(self.last_alien_shot)
         pygame.init()
         pygame.display.set_caption("Inwazja obcych")
 
@@ -240,20 +240,6 @@ class AlienInvasion:
             if self.main_menu_button.menu_button_is_pressed():
                 self.run_game()
             pygame.display.update()
-
-
-class Explosion:
-    def __init__(self, explosion_x, explosion_y):
-        self.explosion_image = pygame.image.load("images/exp1.png")
-        self.expl_img_width = self.explosion_image.get_width()
-        self.expl_img_height = self.explosion_image.get_height()
-        self.explosion_x = explosion_x
-        self.explosion_y = explosion_y
-
-    def get_explosion_rect(self):
-        explosion_position = pygame.rect.Rect(self.explosion_x - 31, self.explosion_y - 18, self.expl_img_width,
-                                              self.expl_img_height)
-        GameSettings.screen.blit(ExplosionSettings.image, explosion_position)
 
 
 def main():
