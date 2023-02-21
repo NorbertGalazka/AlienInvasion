@@ -16,8 +16,8 @@ class GameSettings:
 
 @dataclass
 class AlienSettings:
-    alien_columns = 1
-    alien_rows = 1
+    alien_columns = 3
+    alien_rows = 2
     alien_cooldown = 500
 
 
@@ -51,5 +51,11 @@ class AlienBulletSettings:
 
 @dataclass
 class BossSettings:
-    boss_speed = 0.5
     boss_img = pygame.image.load("images\\little_boss.png")
+    boss_speed = 0.5
+    boss_hp = 10
+
+
+@dataclass
+class ExplosionSettings:
+    image = pygame.image.load("images/Screenshot_8-removebg-preview.png")
