@@ -58,4 +58,6 @@ class BossSettings:
 
 @dataclass
 class ExplosionSettings:
-    image = pygame.image.load("images/Screenshot_8-removebg-preview.png")
+    image = pygame.image.load("images/burst2.png")
+    image_height = image.get_height()
+    image_width = image.get_width()
