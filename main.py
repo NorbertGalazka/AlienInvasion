@@ -21,7 +21,7 @@ class AlienInvasion:
         self.lost_game_button = LostGameButton()
         self.main_menu_button = MainMenuButton()
         self.last_alien_shot = pygame.time.get_ticks()
-        self.explosion = Explosion(0,0)
+        self.explosion = Explosion(0,0,0,1)
         self.draw_times = 0
         self.x = 0
         self.y = 0
@@ -80,8 +80,7 @@ class AlienInvasion:
             if alien_bullet_position.colliderect(spaceship_position):
                 alien_bullets.remove(alien_bullet)
 
-                explosion = Explosion(spaceship_position[0],spaceship_position[1])
-                explosion.get_explosion_rect()
+                # explosion = Explosion(spaceship_position[0],spaceship_position[1],0,1)
 
                 return False
 
@@ -181,8 +180,11 @@ class AlienInvasion:
         aliens = []
         alien_bullets = []
 
-        self.create_aliens(aliens)
+        list_of_explosion = []
 
+        self.create_aliens(aliens)
+        index = 0
+        loop_times = 0
         while True:
             pygame.time.Clock().tick(60)
 
@@ -210,15 +212,24 @@ class AlienInvasion:
             self.alien_bullet.change_alien_bullet_position(alien_bullets)
 
             colision = self.remove_alien_spaceship_bullet_if_collision(aliens, bullets)
+            # print(colision)
 
             if colision:
-                self.draw_times = 10
                 self.x = colision[1][0]
                 self.y = colision[1][1]
-            if self.draw_times > 0:
-                self.draw_times -= 1
-                explosion = Explosion(self.x, self.y)
-                explosion.get_explosion_rect()
+                burst = Explosion(self.x, self.y, 15, 1)
+                list_of_explosion.append(burst)
+
+            for explosion in list_of_explosion:
+                explosion.get_explosion_rect(index)
+                loop_times += 1
+                if loop_times == 4:
+                    index += 1
+                    loop_times = 0
+            if index == 4:
+                index = 0
+                list_of_explosion.remove(explosion)
+            print(list_of_explosion)
 
             is_game_started = self.alien_bullet_collision_spaceship(alien_bullets, spaceship_position)
 
