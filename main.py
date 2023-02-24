@@ -21,7 +21,7 @@ class AlienInvasion:
         self.lost_game_button = LostGameButton()
         self.main_menu_button = MainMenuButton()
         self.last_alien_shot = pygame.time.get_ticks()
-        self.explosion = Explosion(0,0,0,1)
+        self.explosion = Explosion(0,0,1)
         self.draw_times = 0
         self.x = 0
         self.y = 0
@@ -172,6 +172,18 @@ class AlienInvasion:
             else:
                 self.restart_game_menu()
 
+    def draw_explosion(self,list_of_explosion,index, loop_times):
+        for explosion in list_of_explosion:
+            explosion.get_explosion_rect(index)
+            loop_times += 1
+            if loop_times == 4:
+                index += 1
+                loop_times = 0
+        if index == 5:
+            index = 0
+            list_of_explosion.remove(explosion)
+        return index, loop_times
+
     def run_game(self):
         pygame.init()
         pygame.display.set_caption("Inwazja obcych")
@@ -185,6 +197,7 @@ class AlienInvasion:
         self.create_aliens(aliens)
         index = 0
         loop_times = 0
+        time_for_last_explosion = 0
         while True:
             pygame.time.Clock().tick(60)
 
@@ -205,31 +218,23 @@ class AlienInvasion:
             self.bullet.change_bullet_position(bullets)
 
             self.alien.get_alien_rect(aliens)
-            self.alien.alien_movement(aliens)
+            if self.alien.alien_movement(aliens):
+                self.restart_game_menu()
+
 
             self.alien_bullet.get_alien_bullet_rect(alien_bullets)
             self.alien_shot(time_now, aliens, alien_bullets)
             self.alien_bullet.change_alien_bullet_position(alien_bullets)
 
             colision = self.remove_alien_spaceship_bullet_if_collision(aliens, bullets)
-            # print(colision)
 
             if colision:
                 self.x = colision[1][0]
                 self.y = colision[1][1]
-                burst = Explosion(self.x, self.y, 15, 1)
-                list_of_explosion.append(burst)
+                explosion = Explosion(self.x, self.y, 1)
+                list_of_explosion.append(explosion)
 
-            for explosion in list_of_explosion:
-                explosion.get_explosion_rect(index)
-                loop_times += 1
-                if loop_times == 4:
-                    index += 1
-                    loop_times = 0
-            if index == 4:
-                index = 0
-                list_of_explosion.remove(explosion)
-            print(list_of_explosion)
+            index, loop_times = self.draw_explosion(list_of_explosion, index, loop_times)
 
             is_game_started = self.alien_bullet_collision_spaceship(alien_bullets, spaceship_position)
 
@@ -238,6 +243,8 @@ class AlienInvasion:
             else:
                 self.restart_game_menu()
             if len(aliens) == 0:
+                time_for_last_explosion += 1
+            if time_for_last_explosion == 30:
                 time.sleep(0.3)
                 self.second_round()
 
