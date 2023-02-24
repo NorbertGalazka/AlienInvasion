@@ -27,6 +27,8 @@ class Alien:
                 self.move_direction *= -1
             elif alien.alien_x_position > 500:
                 self.move_direction *= -1
+            if alien.alien_y_position > 793:
+                return True
 
 
 class AlienBullet:
