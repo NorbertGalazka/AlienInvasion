@@ -61,3 +61,18 @@ class ExplosionSettings:
     image = pygame.image.load("images/burst2.png")
     image_height = image.get_height()
     image_width = image.get_width()
+
+@dataclass
+class SoundsSettings:
+    pygame.mixer.pre_init(44100, -16, 2, 512)
+    pygame.mixer.init()
+    explosion_fx = pygame.mixer.Sound("sounds/explosion1.wav")
+    explosion_fx.set_volume(0.15)
+    laser_sound = pygame.mixer.Sound("sounds/laser.wav")
+    laser_sound.set_volume(0.15)
+    small_explosion_sound = pygame.mixer.Sound("sounds/explosion2.wav")
+    small_explosion_sound.set_volume(0.2)
+    game_over_sound = pygame.mixer.Sound("sounds/game_over.wav")
+    game_over_sound.set_volume(0.15)
+    win_game_sound = pygame.mixer.Sound("sounds/you_win.wav")
+    win_game_sound.set_volume(0.15)
