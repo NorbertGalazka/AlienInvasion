@@ -2,6 +2,8 @@ import time
 import pygame
 import sys
 import random
+
+import Sounds
 from settings import GameSettings, ShipBulletSettings,AlienBulletSettings, AlienSettings,\
     ShipSettings, BossSettings, ExplosionSettings
 from Ship import Ship, SpaceshipBullet
@@ -9,6 +11,7 @@ from Alien import Alien, AlienBullet
 from Boss import BossAlien, BossAlienBullet
 from Buttons import LostGameButton, MainMenuButton
 from Explosion import Explosion
+from Sounds import Sounds
 
 
 class AlienInvasion:
@@ -21,10 +24,10 @@ class AlienInvasion:
         self.lost_game_button = LostGameButton()
         self.main_menu_button = MainMenuButton()
         self.last_alien_shot = pygame.time.get_ticks()
-        self.explosion = Explosion(0,0,1)
         self.draw_times = 0
-        self.x = 0
-        self.y = 0
+        self.sound = Sounds()
+        self.explosion = Explosion(0,0,1)
+
 
     def create_aliens(self, aliens):
         for row in range(AlienSettings.alien_rows):  # Utworzenie obcych
@@ -39,12 +42,12 @@ class AlienInvasion:
             alien_bullets.append(alien_bullet)
             self.last_alien_shot = time_now
 
-    def boss_shot(self, time_now, boss_bullets,boss):
+    def boss_shot(self, time_now, boss_bullets, boss):
         if time_now - self.last_alien_shot > AlienSettings.alien_cooldown:
 
             attacking_alien = boss
             shot_directions = [7, -7, 0]
-            shot_directions_without_zero = [7, 7]
+            shot_directions_without_zero = [7,-7]
             first_direction = random.choice(shot_directions)
             if first_direction == 0:
                 second_direction = random.choice(shot_directions_without_zero)
@@ -56,7 +59,7 @@ class AlienInvasion:
             boss_bullets.append(boss_bullet)
             self.last_alien_shot = time_now
 
-    def remove_alien_spaceship_bullet_if_collision(self, aliens, bullets):
+    def remove_alien_spaceship_bullet_if_collision(self, aliens, bullets,):
         for alien in aliens:
             for bullet in bullets:
                 alien_position = pygame.rect.Rect(alien.alien_x_position, alien.alien_y_position,
@@ -68,6 +71,7 @@ class AlienInvasion:
                 if bullet_position.colliderect(alien_position):
                     aliens.remove(alien)
                     bullets.remove(bullet)
+                    self.sound.play_explosion_sound()
                     return True, alien_position
 
     def alien_bullet_collision_spaceship(self, alien_bullets, spaceship_position):
@@ -79,24 +83,41 @@ class AlienInvasion:
 
             if alien_bullet_position.colliderect(spaceship_position):
                 alien_bullets.remove(alien_bullet)
-
-                # explosion = Explosion(spaceship_position[0],spaceship_position[1],0,1)
-
                 return False
 
-    def spacebullet_collision_boss_alien(self, bullets, boss_position):
+    def draw_explosion(self, list_of_explosion, index, loop_times):
+        for explosion in list_of_explosion:
+            explosion.get_explosion_rect(index)
+            loop_times += 1
+            if loop_times == 2:
+                index += 1
+                loop_times = 0
+            if index == 5:
+                index = 0
+                list_of_explosion.remove(explosion)
+        return index, loop_times
+
+
+    def spacebullet_collision_boss_alien(self, bullets, boss_position,list_of_explosion):
         for bullet in bullets:
             bullet_position = pygame.rect.Rect(bullet.bullet_x_start_position,
                                                bullet.bullet_y_start_position,
                                                ShipBulletSettings.bullet_width, ShipBulletSettings.bullet_height)
             if boss_position.colliderect(bullet_position):
                 bullets.remove(bullet)
+
+                collision_x_pos = bullet_position[0]
+                collision_y_pos = bullet_position[1]
+                explosion = Explosion(collision_x_pos, collision_y_pos, 2)
+                list_of_explosion.append(explosion)
                 self.boss.boss_hp -= 1
+                self.sound.play_small_explosion_sound()
             if self.boss.boss_hp <= 0:
                 self.boss.boss_hp = BossSettings.boss_hp
                 return True
 
     def you_win_menu(self):
+        self.sound.play_win_game_sound()
         self.lost_game_button.restart_button_x_cord = 100
         self.lost_game_button.restart_button_y_cord = 600
         while True:
@@ -111,6 +132,7 @@ class AlienInvasion:
             pygame.display.update()
 
     def restart_game_menu(self):
+        self.sound.play_game_over_sound()
         while True:
             pygame.time.Clock().tick(60)
             for event in pygame.event.get():
@@ -126,6 +148,11 @@ class AlienInvasion:
         bullets = []
         boss_bullets = []
         boss = BossAlien(250, 50)
+        list_of_explosion = []
+        index = 0
+        loop_times = 0
+        self.ship.rect_start_x_position = 265
+        self.ship.rect_start_y_position = 680
 
         while True:
             pygame.time.Clock().tick(60)
@@ -136,6 +163,7 @@ class AlienInvasion:
                     if event.key == pygame.K_SPACE:
                         bullets.append(SpaceshipBullet(self.ship.rect_start_x_position + ShipSettings.rect_width / 2.15,
                                                        self.ship.rect_start_y_position))
+                        self.sound.play_laser_sound()
 
             time_now = pygame.time.get_ticks()
 
@@ -162,7 +190,9 @@ class AlienInvasion:
             if boss_position.colliderect(spaceship_position):
                 self.restart_game_menu()
 
-            if self.spacebullet_collision_boss_alien(bullets, boss_position):
+            index, loop_times = self.draw_explosion(list_of_explosion, index, loop_times)
+
+            if self.spacebullet_collision_boss_alien(bullets, boss_position,list_of_explosion):
                 self.you_win_menu()
 
             is_game_started = self.alien_bullet_collision_spaceship(boss_bullets, spaceship_position)
@@ -171,18 +201,6 @@ class AlienInvasion:
                 pygame.display.update()
             else:
                 self.restart_game_menu()
-
-    def draw_explosion(self,list_of_explosion,index, loop_times):
-        for explosion in list_of_explosion:
-            explosion.get_explosion_rect(index)
-            loop_times += 1
-            if loop_times == 4:
-                index += 1
-                loop_times = 0
-        if index == 5:
-            index = 0
-            list_of_explosion.remove(explosion)
-        return index, loop_times
 
     def run_game(self):
         pygame.init()
@@ -193,11 +211,18 @@ class AlienInvasion:
         alien_bullets = []
 
         list_of_explosion = []
+        turn = 0
 
         self.create_aliens(aliens)
         index = 0
         loop_times = 0
+        index1 = 0
+        loop_times1 = 0
         time_for_last_explosion = 0
+        self.ship.rect_start_x_position = 265
+        self.ship.rect_start_y_position = 680
+        list1 = []
+
         while True:
             pygame.time.Clock().tick(60)
 
@@ -208,6 +233,7 @@ class AlienInvasion:
                     if event.key == pygame.K_SPACE:
                         bullets.append(SpaceshipBullet(self.ship.rect_start_x_position + ShipSettings.rect_width / 2.15,
                                                        self.ship.rect_start_y_position))
+                        self.sound.play_laser_sound()
 
             time_now = pygame.time.get_ticks()
 
@@ -221,27 +247,34 @@ class AlienInvasion:
             if self.alien.alien_movement(aliens):
                 self.restart_game_menu()
 
-
             self.alien_bullet.get_alien_bullet_rect(alien_bullets)
             self.alien_shot(time_now, aliens, alien_bullets)
             self.alien_bullet.change_alien_bullet_position(alien_bullets)
 
-            colision = self.remove_alien_spaceship_bullet_if_collision(aliens, bullets)
+            collision = self.remove_alien_spaceship_bullet_if_collision(aliens, bullets)
 
-            if colision:
-                self.x = colision[1][0]
-                self.y = colision[1][1]
-                explosion = Explosion(self.x, self.y, 1)
+            if collision:
+                collision_x_pos = collision[1][0]
+                collision_y_pos = collision[1][1]
+                explosion = Explosion(collision_x_pos, collision_y_pos, 1)
                 list_of_explosion.append(explosion)
 
             index, loop_times = self.draw_explosion(list_of_explosion, index, loop_times)
 
             is_game_started = self.alien_bullet_collision_spaceship(alien_bullets, spaceship_position)
-
+            if is_game_started is False:
+                ship_explosion = Explosion(spaceship_position[0],spaceship_position[1],3)
+                list1.append(ship_explosion)
+                turn = 10
+            if turn:
+                index1, loop_times1 = self.draw_explosion(list1, index1, loop_times1)
+                turn -= 1
+            if turn == 1:
+                self.restart_game_menu()
             if is_game_started is None:
                 pygame.display.update()
-            else:
-                self.restart_game_menu()
+            elif is_game_started is False:
+                self.sound.play_explosion_sound()
             if len(aliens) == 0:
                 time_for_last_explosion += 1
             if time_for_last_explosion == 30:
