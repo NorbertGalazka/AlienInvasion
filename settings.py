@@ -11,7 +11,9 @@ class GameSettings:
     left_edge_of_the_screen = 0
     game_over_image = pygame.image.load("images/game_over.png")
     start_game_image = pygame.image.load("images/start_game.png")
+    start_game_hovered =pygame.image.load("images/start_game_bcg.png")
     you_win_image = pygame.image.load("images/you_win_r_bg.png")
+
 
 
 @dataclass
