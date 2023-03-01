@@ -25,7 +25,11 @@ class MainMenuButton:
                                              GameSettings.start_game_image.get_width(),GameSettings.start_game_image.get_height())
 
     def menu_button_is_pressed(self):
-        GameSettings.screen.blit(GameSettings.start_game_image, (self.start_game_button_x_cord, self.start_game_button_y_cord))
         if self.start_game_hitbox.collidepoint(pygame.mouse.get_pos()):
+            GameSettings.screen.blit(GameSettings.start_game_hovered,
+                                     (self.start_game_button_x_cord, self.start_game_button_y_cord))
             if pygame.mouse.get_pressed()[0]:
                 return True
+        else:
+            GameSettings.screen.blit(GameSettings.start_game_image,
+                                     (self.start_game_button_x_cord, self.start_game_button_y_cord))
