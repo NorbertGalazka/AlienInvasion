@@ -10,10 +10,11 @@ class GameSettings:
     screen = pygame.display.set_mode((screen_width, screen_height))
     left_edge_of_the_screen = 0
     game_over_image = pygame.image.load("images/game_over.png")
+    restart_image = pygame.image.load("images/restart_image.png")
+    restart_image_hovered = pygame.image.load("images/restart_grey_bcg.png")
     start_game_image = pygame.image.load("images/start_game.png")
     start_game_hovered =pygame.image.load("images/start_game_bcg.png")
     you_win_image = pygame.image.load("images/you_win_r_bg.png")
-
 
 
 @dataclass
@@ -54,8 +55,10 @@ class AlienBulletSettings:
 @dataclass
 class BossSettings:
     boss_img = pygame.image.load("images\\little_boss.png")
+    rect_width = boss_img.get_width()
+    rect_height = boss_img.get_height()
     boss_speed = 0.5
-    boss_hp = 10
+    boss_hp = 20
 
 
 @dataclass

@@ -22,6 +22,10 @@ class Explosion:
                 self.image = pygame.transform.scale(self.image, (200, 200))
                 self.correct_pos_x = 60
                 self.correct_pos_y = 40
+            if self.size == 4:
+                self.image = pygame.transform.scale(self.image, (300, 300))
+                self.correct_pos_x = 100
+                self.correct_pos_y = 100
 
             self.images.append(self.image)
 
