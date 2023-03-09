@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class GameSettings:
-    bg = pygame.image.load("images\space.png")
+    background = pygame.image.load("images\space.png")
     screen_width = 589
     screen_height = 793
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -66,6 +66,7 @@ class ExplosionSettings:
     image = pygame.image.load("images/burst2.png")
     image_height = image.get_height()
     image_width = image.get_width()
+
 
 @dataclass
 class SoundsSettings:
