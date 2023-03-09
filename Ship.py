@@ -33,11 +33,12 @@ class Ship:
 
         return self.rect_start_x_position, self.rect_start_y_position
 
-    def get_ship_rect(self):
+    def get_ship_rect(self, ship_is_alive):
         spaceship_x_position, spaceship_y_position = self.get_spaceship_position()
         spaceship_position = pygame.rect.Rect(spaceship_x_position, spaceship_y_position, ShipSettings.rect_width,
                                               ShipSettings.rect_height)
-        GameSettings.screen.blit(ShipSettings.spaceship_img, spaceship_position)
+        if ship_is_alive is True:
+            GameSettings.screen.blit(ShipSettings.spaceship_img, spaceship_position)
         return spaceship_position
 
 
