@@ -11,7 +11,7 @@ class Explosion:
         for num in range(0, 5):
             self.image = pygame.image.load(f"images/burst{num}.png")
             if self.size == 1:
-                self.image = pygame.transform.scale(self.image,(120,120))
+                self.image = pygame.transform.scale(self.image, (120, 120))
                 self.correct_pos_x = 31
                 self.correct_pos_y = 18
             if self.size == 2:
