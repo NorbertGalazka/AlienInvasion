@@ -14,13 +14,13 @@ class BossHp:
 
     def get_hp_bar_rect(self,boss_x_position, boss_y_position, boss_hp):
         image = pygame.image.load("images/life_bar1.png")
-        if boss_hp < 21  and boss_hp > 16:
+        if boss_hp > 16:
             image = self.image1
-        if boss_hp <= 16 and boss_hp > 12:
+        if 12 > boss_hp <= 16:
             image = self.image2
-        if boss_hp <= 12 and boss_hp > 8:
+        if 8 < boss_hp <= 12:
             image = self.image3
-        if boss_hp <= 8 and boss_hp > 4:
+        if 4 < boss_hp <= 8:
             image = self.image4
         if boss_hp <= 4:
             image = self.image5
