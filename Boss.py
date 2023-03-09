@@ -17,7 +17,7 @@ class BossAlienBullet:
 
     def get_boss_alien_bullet_rect(self, bullet):
         self.bullet_position = pygame.rect.Rect(bullet.bullet_x_start_position, bullet.bullet_y_start_position,
-                                                    AlienBulletSettings.bullet_width, AlienBulletSettings.bullet_height)
+                                                AlienBulletSettings.bullet_width, AlienBulletSettings.bullet_height)
         pygame.draw.rect(GameSettings.screen, AlienBulletSettings.bullet_color, self.bullet_position)
 
     def change_boss_alien_bullet_position(self):
