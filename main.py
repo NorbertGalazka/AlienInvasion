@@ -27,11 +27,14 @@ class AlienInvasion:
         self.last_alien_shot = pygame.time.get_ticks()
         self.sound = Sounds()
 
-    def create_aliens(self, aliens):
+    @staticmethod
+    def create_aliens():
+        aliens = []
         for row in range(AlienSettings.alien_rows):
             for amount in range(AlienSettings.alien_columns):
                 alien = Alien(100 + amount * 150, 50 + row * 150)
                 aliens.append(alien)
+        return aliens
 
     def restart_game_menu(self):
         self.lost_game_button.restart_button_x_cord = 100
@@ -266,11 +269,11 @@ class AlienInvasion:
         pygame.init()
         pygame.display.set_caption("Inwazja obcych")
         bullets = []
-        aliens = []
+        aliens = self.create_aliens()
         alien_bullets = []
         alien_explosions = []
         ship_explosions = []
-        self.create_aliens(aliens)
+
         loop_turns = 0
         image_index = 0
         loop_times = 0
